@@ -1,0 +1,16 @@
+target/
+dbt_packages/
+logs/
+*.duckdb
+.venv/
+.user.yml
+profiles.yml
+*.p8
+*.pub
+.venv/
+*.p8
+*.pub
+profiles.yml
+.DS_Store
+target/
+logs/

@@ -1,0 +1,18 @@
+version: 2
+
+sources:
+  - name: google_sheets
+    description: Raw tables loaded by Fivetran from Google Sheets. Never edited by hand.
+    database: FIVETRAN_DATABASE
+    schema: GOOGLE_SHEETS
+    tables:
+      - name: raw_trades
+        config:
+          loaded_at_field: _fivetran_synced
+          freshness:
+            warn_after: {count: 24, period: hour}
+      - name: raw_prices
+        config:
+          loaded_at_field: _fivetran_synced
+          freshness:
+            warn_after: {count: 24, period: hour}

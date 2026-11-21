@@ -1,0 +1,15 @@
+# Copy this to ~/.dbt/profiles.yml (NOT into the repo) and fill in your values.
+energy_dbt:
+  target: dev
+  outputs:
+    dev:
+      type: snowflake
+      account: YOUR_ORG-YOUR_ACCOUNT          # host name without .snowflakecomputing.com
+      user: DBT_USER
+      role: DBT_ROLE
+      private_key_path: /Users/YOU/keys/dbt_key.p8   # outside the repo
+      database: ANALYTICS
+      schema: TRADING
+      warehouse: FIVETRAN_WAREHOUSE
+      schema: ANALYTICS                       # dbt writes its models here
+      threads: 4

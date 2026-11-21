@@ -1,0 +1,10 @@
+name: energy_dbt
+version: "1.0.0"
+profile: energy_dbt
+
+models:
+  energy_dbt:
+    staging:
+      +materialized: view
+    marts:
+      +materialized: table
