@@ -1,7 +1,0 @@
-.venv/
-*.p8
-*.pub
-profiles.yml
-.DS_Store
-target/
-logs/
