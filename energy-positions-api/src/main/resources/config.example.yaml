@@ -1,0 +1,5 @@
+http:
+  port: "8081"
+snowflake:
+  url: "jdbc:snowflake://YOUR_ORG-YOUR_ACCOUNT.snowflakecomputing.com/?db=ANALYTICS&schema=TRADING&warehouse=FIVETRAN_WAREHOUSE&role=MULE_ROLE&private_key_file=private_key_file=/FULL/PATH/mule_key.p8&JDBC_QUERY_RESULT_FORMAT=JSON"
+  user: "MULE_USER"
