@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
         http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
         http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
         http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
@@ -7,18 +7,19 @@
 
     <flow name="get-positions-flow">
         <http:listener config-ref="HTTP_Listener_config" path="/positions" allowedMethods="GET" />
-
-        <db:select config-ref="Snowflake_Database_Config">
+        <flow-ref doc:name="Flow-ref" name="query-positions" />
+    </flow>
+    <sub-flow name="query-positions">
+        <db:select doc:name="Select" doc:id="wfooey" config-ref="Snowflake_Database_Config">
             <db:sql>
                 <![CDATA[select desk, instrument, net_position_mwh, settle_price_eur, position_value_eur
 from NET_POSITION
 order by desk, instrument]]>
             </db:sql>
         </db:select>
-
-        <ee:transform>
+        <ee:transform doc:name="Transform Message" doc:id="cmlezp">
             <ee:message>
-                <ee:set-payload>
+                <ee:set-payload doc:name="Set payload" doc:id="pbzwif">
                     <![CDATA[%dw 2.0
 output application/json
 ---
@@ -32,5 +33,5 @@ payload map (row) -> {
                 </ee:set-payload>
             </ee:message>
         </ee:transform>
-    </flow>
+    </sub-flow>
 </mule>
