@@ -11,14 +11,13 @@
 - mark to market value (eur)]]>
             </mcp:description>
             <mcp:parameters-schema>
-                <![CDATA[{
-  "type": "object",
-  "properties": {},
-  "required": []
-}]]>
+                <![CDATA[${file::schemas/positions-input.json}]]>
             </mcp:parameters-schema>
+            <mcp:output-schema-definition>
+                <mcp:file-output-schema outputSchemaFile="schemas/positions-output.json" />
+            </mcp:output-schema-definition>
             <mcp:responses>
-                <mcp:text-tool-response-content text="#[write(payload, 'application/json')]" />
+                <mcp:text-tool-response-content text="#[#[write({ positions: payload }, 'application/json')]]" />
             </mcp:responses>
             <mcp:on-error-responses>
                 <mcp:text-tool-response-content text="#['Could not load positions: ' ++ (error.description default 'unknown error')]" />

@@ -1,0 +1,20 @@
+{
+  "type": "object",
+  "properties": {
+    "positions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "desk": { "type": "string", "description": "Trading desk, e.g. power_uk" },
+          "instrument": { "type": "string", "description": "Contract: country, BASE or PEAK, delivery month" },
+          "netPositionMwh": { "type": "number", "description": "Net volume in MWh. Positive = long, negative = short" },
+          "settlePriceEur": { "type": "number", "description": "Latest settlement price in EUR per MWh" },
+          "positionValueEur": { "type": "number", "description": "Mark-to-market value in EUR" }
+        },
+        "required": ["desk", "instrument", "netPositionMwh", "settlePriceEur", "positionValueEur"]
+      }
+    }
+  },
+  "required": ["positions"]
+}
