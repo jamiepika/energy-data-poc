@@ -2,7 +2,7 @@
 
 A small end-to-end data integration POC using Fivetran, Snowflake, dbt and MuleSoft.
 
-It takes made-up power trades and settlement prices, cleans them, calculates each desk's net position, and serves the result as a JSON API.
+It takes artificial power trades and settlement prices, cleans them, calculates each desk's net position, and serves the result as a JSON API.
 
 ```mermaid
 flowchart LR
@@ -39,7 +39,7 @@ curl http://localhost:8081/positions
 
 ## Access
 
-Each tool has its own Snowflake service user and role, using key-pair auth:
+Each integration layer has its own Snowflake service user and role, using key-pair auth:
 
 | User | Can do |
 |---|---|
@@ -55,6 +55,12 @@ See the README in each folder:
 - `energy_dbt/README.md`
 - `energy-positions-api/README.md`
 
+
+## MCP Server
+- Runs at with `http://localhost:8081/mcp` 
+- One tool: get_positions. Returns positions through the same subflow as `GET /positions`, so the agent recieves the same JSON response above.
+- To test: run the MCP Inspector (`npx @modelcontextprotocol/inspector`), connect with Streamable HTTP to the URL above, and call `get_positions`.
+
 ## What I'd change for production
 
 - Naming conventions: the databases by layer (`RAW`, `ANALYTICS`) and give dbt its own warehouse for cost tracking
@@ -62,4 +68,4 @@ See the README in each folder:
 - Write the API spec first so it could be shared with other teams (front end/AI)
 - Add error handling, filtering and API Manager policies
 - Run dbt on a schedule after each Fivetran sync, with alerts on failed tests
-- Expose the API as an MCP tool via Mule
+- Custom Fivetran connector as I doubt the data would be coming from Google sheets :D 
