@@ -55,6 +55,49 @@ DataWeave renames Snowflake's uppercase column names (`NET_POSITION_MWH`) to cam
 3. **Run -> Start Debugging**. The first run downloads the Mule runtime and libraries and takes a few minutes.
 4. Wait for `DEPLOYED` in the console, then `curl http://localhost:8081/positions`.
 
+## Testing the MCP tool with curl
+
+For Node 22+ you can use MCP Inspector (`npx @modelcontextprotocol/inspector`), connect with Streamable HTTP to the URL above, and call `get_positions`.
+
+For earlier versions of Node, run these in the terminal while the app is running.
+
+**1. Handshake: start a session and save its ID**
+
+```bash
+SESSION_ID=$(curl -s -i -X POST http://localhost:8081/mcp \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json, text/event-stream" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"curl","version":"1.0"}}}' \
+  | grep -i '^mcp-session-id:' | awk '{print $2}' | tr -d '\r')
+echo $SESSION_ID
+```
+
+**2. List tools: shows the tool's description, input schema and output schema**
+
+```bash
+curl -s -X POST http://localhost:8081/mcp \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json, text/event-stream" \
+  -H "Mcp-Session-Id: $SESSION_ID" \
+  -H "MCP-Protocol-Version: 2025-06-18" \
+  -d '{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}' \
+  | sed -n 's/^data: //p' | python3 -m json.tool
+```
+
+**3. Call the tool**
+
+```bash
+curl -s -X POST http://localhost:8081/mcp \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json, text/event-stream" \
+  -H "Mcp-Session-Id: $SESSION_ID" \
+  -H "MCP-Protocol-Version: 2025-06-18" \
+  -d '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"get_positions","arguments":{}}}' \
+  | sed -n 's/^data: //p' | python3 -m json.tool
+```
+
+Responses are sent as server-sent events, so `sed` strips the `data: ` prefix and `python3 -m json.tool` formats the JSON.
+
 ### Troubleshooting
 
 - **"Attribute 'config-ref' must appear"**: the flow XML wasn't saved, or a component isn't linked to its config in `global-configs.xml`.

@@ -61,7 +61,6 @@ See the README in each folder:
 ## MCP Server
 - Runs at with `http://localhost:8081/mcp` 
 - One tool: get_positions. Returns positions through the same subflow as `GET /positions`, so the agent recieves the same JSON response above.
-- To test: run the MCP Inspector (`npx @modelcontextprotocol/inspector`), connect with Streamable HTTP to the URL above, and call `get_positions`.
 
 ## What I'd change for production
 
