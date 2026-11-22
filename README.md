@@ -2,7 +2,7 @@
 
 A small end-to-end data integration POC using Fivetran, Snowflake, dbt and MuleSoft.
 
-It takes artificial power trades and settlement prices, cleans them, calculates each desk's net position, and serves the result as a JSON API.
+It takes artificial power trades and settlement prices, cleans them, calculates each desk's net position, and serves the result as a JSON API and a MCP Tool.
 
 ```mermaid
 flowchart LR
