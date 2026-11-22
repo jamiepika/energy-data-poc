@@ -24,7 +24,7 @@
                 <artifactId>mule-maven-plugin</artifactId>
                 <version>${mule.maven.plugin.version}</version>
                 <extensions>true</extensions>
-                                <configuration>
+                <configuration>
                     <sharedLibraries>
                         <sharedLibrary>
                             <groupId>net.snowflake</groupId>
@@ -77,6 +77,12 @@
             <groupId>net.snowflake</groupId>
             <artifactId>snowflake-jdbc</artifactId>
             <version>3.20.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.mulesoft.connectors</groupId>
+            <artifactId>mule-mcp-connector</artifactId>
+            <version>1.6.0</version>
+            <classifier>mule-plugin</classifier>
         </dependency>
     </dependencies>
 </project>
