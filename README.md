@@ -6,7 +6,9 @@ It takes artificial power trades and settlement prices, cleans them, calculates 
 
 ```mermaid
 flowchart LR
-  A[Google Sheets] --> B[Fivetran] --> C[(Snowflake raw)] --> D[dbt] --> E[(Snowflake analytics)] --> F[MuleSoft API]
+  A[Google Sheets] --> B[Fivetran] --> C[(Snowflake raw)] --> D[dbt] --> E[(Snowflake analytics)] --> F[MuleSoft<br/>query-positions]
+  F --> G[REST API<br/>GET /positions]
+  F --> H[MCP tool<br/>get_positions]
 ```
 
 ## What each part does
