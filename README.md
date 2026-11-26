@@ -38,6 +38,7 @@ curl http://localhost:8081/positions
   { "desk": "power_uk", "instrument": "UK_PEAK_DEC", "netPositionMwh": 25,  "settlePriceEur": 119,   "positionValueEur": 2975 }
 ]
 ```
+The MCP tool returns the same positions, wrapped as {"positions": [...]}.
 
 ## Access
 
@@ -57,14 +58,9 @@ See the README in each folder:
 - `energy_dbt/README.md`
 - `energy-positions-api/README.md`
 
-
-## MCP Server
-- Runs at with `http://localhost:8081/mcp` 
-- One tool: get_positions. Returns positions through the same subflow as `GET /positions`, so the agent recieves the same JSON response above.
-
 ## What I'd change for production
 
-- Naming conventions: the databases by layer (`RAW`, `ANALYTICS`) and give dbt its own warehouse for cost tracking
+- Naming conventions: the databases by layer (`RAW`, `ANALYTICS`) 
 - Key management: keep keys in a secrets manager and rotate them
 - Write the API spec first so it could be shared with other teams (front end/AI)
 - Add error handling, filtering and API Manager policies
