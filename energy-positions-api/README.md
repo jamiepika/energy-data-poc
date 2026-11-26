@@ -1,48 +1,38 @@
 # energy-positions-api
 
-A small Mule 4 application that serves the dbt `NET_POSITION` mart from Snowflake as a JSON API.
+A small Mule 4 application that serves the dbt `NET_POSITION` mart from Snowflake as a JSON API and MCP server.
 
 ```
 Google Sheets -> Fivetran -> Snowflake (raw) -> dbt (ANALYTICS.TRADING) -> this API -> apps / agents
 ```
 
-## Endpoint
-
-`GET /positions` returns each desk's net position per instrument, marked to market at the latest settlement price.
-
-```
-curl http://localhost:8081/positions
-```
-
-Example response (shape):
-
-```json
-[
-  {
-    "desk": "power_de",
-    "instrument": "DE_BASE_DEC",
-    "netPositionMwh": -40,
-    "settlePriceEur": 86.00,
-    "positionValueEur": -3440
-  }
-]
-```
+## Endpoints
+ 
+| Type | URL | Returns |
+|---|---|---|
+| REST | `GET http://localhost:8081/positions` | JSON list of positions |
+| MCP | `http://localhost:8081/mcp` (Streamable HTTP) | Tool `get_positions`, returning `{"positions": [...]}` |
+ 
+Both call the same `query-positions` sub-flow, so the data is identical. The port is set in `config.yaml`.
+The fields are described in `src/main/resources/schemas/positions-output.json`.
 
 ## How it works
 
 | File | Purpose |
 |---|---|
-| `src/main/mule/energy-positions-api.xml` | The flow: HTTP Listener -> Database Select -> Transform Message (DataWeave) |
+| `src/main/mule/energy-positions-api.xml` | REST flow (`GET /positions`) and the shared `query-positions` sub-flow:: HTTP Listener -> Database Select -> Transform Message (DataWeave) |
 | `src/main/mule/global-configs.xml` | Shared configs: properties file, HTTP listener (port), Snowflake JDBC connection |
 | `src/main/resources/config.yaml` | Local connection settings. **Git-ignored.** Copy from `config.example.yaml` |
 | `pom.xml` | Connectors (HTTP, Database) and the Snowflake JDBC driver, registered as a shared library so the Database connector can load it |
+| `src/main/mule/mcp-tools.xml` | MCP tool flow: Tool Listener -> `query-positions` |
+| `scripts/smoke_test.py` | End-to-end check of both endpoints |
 
 DataWeave renames Snowflake's uppercase column names (`NET_POSITION_MWH`) to camelCase JSON (`netPositionMwh`).
 
 ## Prerequisites
 
 - VS Code with the **Anypoint Extension Pack** (Anypoint Code Builder), signed in to Anypoint Platform
-- Java (Code Builder prompts if missing)
+- Java 17+ and Mule 4.9.6+
 - A Snowflake service user `MULE_USER` with read-only role `MULE_ROLE`:
   usage on the warehouse, `ANALYTICS` database and `TRADING` schema, plus `select` on current **and future** tables
   (dbt rebuilds the tables on every run, so future grants keep access working)
@@ -53,11 +43,13 @@ DataWeave renames Snowflake's uppercase column names (`NET_POSITION_MWH`) to cam
 1. Copy `src/main/resources/config.example.yaml` to `config.yaml` in the same folder and set the full path to the private key in `private_key_file=`.
 2. Open **this folder** (`energy-positions-api`) as the root folder in VS Code. Code Builder requires the Mule project at the workspace root.
 3. **Run -> Start Debugging**. The first run downloads the Mule runtime and libraries and takes a few minutes.
-4. Wait for `DEPLOYED` in the console, then `curl http://localhost:8081/positions`.
+4. Wait for `DEPLOYED` in the console then you can test with `python3 scripts/smoke_test.py`
 
-## Testing the MCP tool with curl
+## Testing Manually
 
-For Node 22+ you can use MCP Inspector (`npx @modelcontextprotocol/inspector`), connect with Streamable HTTP to the URL above, and call `get_positions`.
+To test the API with curl, run  or `curl http://localhost:8081/positions` in the terminal.
+
+To test the MCP, for Node 22+ you can use MCP Inspector (`npx @modelcontextprotocol/inspector`), connect with Streamable HTTP to the URL above, and call `get_positions`.
 
 For earlier versions of Node, run these in the terminal while the app is running.
 
@@ -110,9 +102,8 @@ Responses are sent as server-sent events, so `sed` strips the `data: ` prefix an
 ## POC shortcuts, and what I'd do in production
 
 - **Secrets:** key path in a git-ignored YAML file. In production: secure (encrypted) properties, with keys held in a secrets manager such as Azure Key Vault and rotated regularly.
-- **API-first:** in production I'd write the OpenAPI/RAML spec first, publish it to Anypoint Exchange, and scaffold the flow from it with APIkit.
+- **API-first:** in production I'd write the OpenAPI/RAML spec first, publish it to Anypoint Exchange, and scaffold the flow from it with APIkit (so other teams (front end, AI) can build against it)
 - **API-led layering:** this app combines layers for simplicity. In a fuller design, a **system API** wraps Snowflake, a **process API** holds the position logic, and **experience APIs** shape the output for each consumer (a dashboard, or an agent's MCP tool).
 - **Error handling:** add an error handler returning clean 4xx/5xx JSON instead of default errors.
-- **Filtering:** add `?desk=` using Database connector **input parameters**, never string-built SQL, to prevent SQL injection.
-- **Deployment:** deploy to CloudHub 2.0 with API Manager policies (client ID enforcement, rate limiting).
-- **Agents:** expose `/positions` as an MCP tool so an AI agent can ask "what's the UK desk's position?" through a governed, read-only interface.
+- **Filtering:** add `?desk=` as a parameter on the API, and 'desk' as a parameter on the MCP, using Database/dataweave input parameters, never SQL (to prevent injection)
+- **Deployment:** deploy with API Manager policies (client ID enforcement, rate limiting, exponential backoff).
